@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abit Kamer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url(images/grass.jpg);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+
+        }
+
+        .portfolio {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 100px;
+        }
+
+        .card {
+            width: 200px;
+            height: 300px;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.1);
+        }
+
+        #bow {
+            position: absolute;
+            left: 20px;
+            bottom: 50px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            z-index: 2;
+            transform-origin: center; 
+            img{
+                transform: rotate(20deg);
+            }
+        }
+
+        #arrow {
+            position: absolute;
+            left: 20px;
+            bottom: 50px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform-origin: center; 
+            img{
+                transform: rotate(20deg);
+            }
+        }
+
+        #stopButton {
+            position: absolute;
+            left: 20px;
+            bottom: 30px;
+            padding: 10px;
+            background-color: transparent;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 3;
+            width: 400px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portfolio">
+        <div class="card" data-url="index-1.html">Portfolio 1</div>
+        <div class="card" data-url="index-2.html">Portfolio 2</div>
+        <div class="card" data-url="index-3.html">Portfolio 3</div>
+        <div class="card" data-url="index-4.html">Portfolio 4</div>
+        <div class="card" data-url="index-5.html">Portfolio 5</div>
+    </div>
+
+    <!-- Yay ve ok -->
+    <div id="bow">
+        <img src="images/bow.png" alt="bow">
+    </div>
+    <div id="arrow">
+        <img src="images/arrow.png" alt="arrow">
+    </div>
+
+    <!-- Durdurma butonu -->
+    <button id="stopButton"></button>
+
+    <script>
+        const bow = document.getElementById('bow');
+        const arrow = document.getElementById('arrow');
+        const stopButton = document.getElementById('stopButton');
+        const bowImg = bow.querySelector('img');
+
+        const cards = document.querySelectorAll('.card');
+
+        let startTime, endTime;
+        let angle = 0;
+        const minAngle = -60; // Minimum açı (derece)
+        const maxAngle = 0;  // Maksimum açı (derece)
+        let animationFrameId;
+        let isAnimating = true;
+        let resetTimeout;
+        let direction = -1;
+
+        // Animasyonu başlat
+        function animateBow() {
+            if (isAnimating) {
+                angle += 0.4 * direction;
+                if (angle >= maxAngle || angle <= minAngle) {
+                    direction *= -1;
+                }
+
+                bow.style.transform = `rotate(${angle}deg)`;
+                arrow.style.transform = `rotate(${angle}deg)`;
+                stopButton.style.display = 'block';
+
+                animationFrameId = requestAnimationFrame(animateBow);
+            }
+        }
+
+        // Animasyonu durdur
+        function stopAnimation() {
+            isAnimating = false;
+            cancelAnimationFrame(animationFrameId);
+            stopButton.style.display = 'none';
+            bow.style.transform = `rotate(${angle}deg)`;
+            arrow.style.transform = `rotate(${angle}deg)`;
+        }
+
+        // Çarpışma kontrolü fonksiyonu
+        function checkCollision(arrow, card) {
+            const arrowRect = arrow.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+
+            return !(
+                arrowRect.top > cardRect.bottom ||
+                arrowRect.bottom < cardRect.top ||
+                arrowRect.left > cardRect.right ||
+                arrowRect.right < cardRect.left
+            );
+        }
+
+        // Yay çekme ve ok fırlatma
+        bow.addEventListener('mousedown', function () {
+            startTime = new Date().getTime();
+            arrow.style.transition = 'none';
+
+            // Açı ayarlanırken yay görünümü
+            bowImg.src = 'images/bow_pulling_0.png';
+
+            // Yayın kademeli gerilmesi
+            setTimeout(() => { bowImg.src = 'images/bow_pulling_1.png'; }, 100);
+            setTimeout(() => { bowImg.src = 'images/bow_pulling_2.png'; }, 200);
+        });
+
+        bow.addEventListener('mouseup', function () {
+            endTime = new Date().getTime();
+            const holdTime = (endTime - startTime) / 1000;
+            const initialSpeed = holdTime * 2000;
+
+            const radianAngle = angle * (Math.PI / 360);
+            let velocityX = initialSpeed * Math.cos(radianAngle);
+            let velocityY = initialSpeed * Math.sin(radianAngle);
+
+            let posX = 0;
+            let posY = 0;
+            const gravity = 1;
+            const timeInterval = 20;
+            const friction = 0.99;
+
+            function moveArrow() {
+                posX += velocityX * (timeInterval / 1000);
+                posY += velocityY * (timeInterval / 1000);
+                velocityY += gravity * (timeInterval / 100);
+                velocityX *= friction;
+
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+
+                // Okun ekran dışına çıkıp çıkmadığını kontrol et
+                if (posX < -arrow.clientWidth || posX > screenWidth || posY < -arrow.clientHeight || posY > screenHeight) {
+                    resetArrow();
+                    return;
+                }
+
+                arrow.style.transform = `translate(${posX}px, ${posY}px) rotate(${angle}deg)`;
+
+                // Tüm kartları kontrol et
+                cards.forEach(card => {
+                    if (checkCollision(arrow, card)) {
+                        window.location.href = card.getAttribute('data-url');
+                    }
+                });
+
+                requestAnimationFrame(moveArrow);
+            }
+
+            function resetArrow() {
+                arrow.style.transform = `translate(0, 0) rotate(${angle}deg)`;
+                bow.style.transform = `rotate(${angle}deg)`;
+                bowImg.src = 'images/bow.png';
+
+                if (resetTimeout) clearTimeout(resetTimeout);
+                resetTimeout = setTimeout(() => {
+                    isAnimating = true;
+                    animateBow();
+                }, 1000);
+            }
+
+            moveArrow();
+        });
+
+        // Animasyonu başlat
+        animateBow();
+
+        // Durdurma butonuna tıklanma olayı
+        stopButton.addEventListener('click', stopAnimation);
+    </script>
+
+</body>
+</html>
