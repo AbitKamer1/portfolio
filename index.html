@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-image: url(images/grass.jpg);
+            background-image: url(grass.jpg);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -95,10 +95,10 @@
 
     <!-- Yay ve ok -->
     <div id="bow">
-        <img src="images/bow.png" alt="bow">
+        <img src="bow.png" alt="bow">
     </div>
     <div id="arrow">
-        <img src="images/arrow.png" alt="arrow">
+        <img src="arrow.png" alt="arrow">
     </div>
 
     <!-- Durdurma butonu -->
@@ -165,11 +165,11 @@
             arrow.style.transition = 'none';
 
             // Açı ayarlanırken yay görünümü
-            bowImg.src = 'images/bow_pulling_0.png';
+            bowImg.src = 'bow_pulling_0.png';
 
             // Yayın kademeli gerilmesi
-            setTimeout(() => { bowImg.src = 'images/bow_pulling_1.png'; }, 100);
-            setTimeout(() => { bowImg.src = 'images/bow_pulling_2.png'; }, 200);
+            setTimeout(() => { bowImg.src = 'bow_pulling_1.png'; }, 100);
+            setTimeout(() => { bowImg.src = 'bow_pulling_2.png'; }, 200);
         });
 
         bow.addEventListener('mouseup', function () {
@@ -217,7 +217,7 @@
             function resetArrow() {
                 arrow.style.transform = `translate(0, 0) rotate(${angle}deg)`;
                 bow.style.transform = `rotate(${angle}deg)`;
-                bowImg.src = 'images/bow.png';
+                bowImg.src = 'bow.png';
 
                 if (resetTimeout) clearTimeout(resetTimeout);
                 resetTimeout = setTimeout(() => {
