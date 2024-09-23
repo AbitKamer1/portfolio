@@ -20,4 +20,4 @@ This project features an interactive portfolio website with a unique bow-and-arr
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/arrow-target-portfolio.git
+   git clone https://github.com/AbitKamer1/arrow-target-portfolio.git
